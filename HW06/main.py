@@ -8,8 +8,54 @@ Author: Reed Cogliano
 import math
 import statistics
 import sys
-import numpy
 
+import numpy
+import pandas
+
+
+def remove_duplicates(csv_file):
+    """
+    Removes duplicates from the dataframe created from the csv data file and outputs that result to the console,
+    which is the exact same as the original data since there are not duplicates.
+    :param csv_file: The student data
+    :return:
+    """
+    student_df = pandas.read_csv(csv_file)
+    student_df.drop_duplicates()
+    print(student_df.to_string())
+
+
+def binary_to_numeric(csv_file):
+    """
+    Converts the multivariable and binary questions to all be binary data, either 1 or 0
+    :param csv_file: The csv file holding the student data
+    :return: The dataframe with the binary data
+    """
+    # Converts binary variables with True or False values to numeric 1 and 0 integers
+    student_df = pandas.read_csv(csv_file)
+    student_df = student_df.applymap(lambda binary_uppercase: binary_uppercase.lower() if type(binary_uppercase) == str else binary_uppercase)
+    student_df['PantsBeforeSocks'] = student_df['PantsBeforeSocks'].apply(lambda binary: 1 if binary else 0)
+    student_df['MatrixPill'] = student_df['MatrixPill'].apply(lambda pill: 1 if pill == "RED" else 0)
+    student_df['ToiletRollOrientation'] = student_df['ToiletRollOrientation'].apply(lambda roll: 1 if roll == "front" else 0)
+    student_df = student_df.applymap(lambda boolean: 1 if boolean == "true" else (0 if boolean == "false" else boolean))
+    student_df = student_df.applymap(lambda binary: 1 if binary == "yes" or binary == "yes." else (0 if binary == "no" or binary == "no." else binary))
+    student_df = student_df.applymap(lambda empty: 0 if empty == " " else empty)
+
+    # Uses one hot coding to convert a variable with multiple answers to a binary variable, such as is a person's
+    # favorite ice cream vanilla or not
+    student_df = student_df.applymap(lambda binary_uppercase: binary_uppercase.lower() if type(binary_uppercase) == str else binary_uppercase)
+    student_df['EMAIL'] = student_df['EMAIL'].apply(lambda email: 1 if email == "cell" else 0)
+    student_df['FavColor'] = student_df['FavColor'].apply(lambda color: 1 if color == "blue" else 0)
+    student_df['HairColor'] = student_df['HairColor'].apply(lambda color: 1 if color == "brown" else 0)
+    student_df['EyeColor'] = student_df['EyeColor'].apply(lambda color: 1 if color == "brown" else 0)
+    student_df['CookieType'] = student_df['CookieType'].apply(lambda color: 1 if color == "chocolate chip" else 0)
+    student_df['FavIceCream'] = student_df['FavIceCream'].apply(lambda color: 1 if color == "vanilla" else 0)
+    student_df['FavPizzaTopping'] = student_df['FavPizzaTopping'].apply(lambda color: 1 if color == "pepperoni" else 0)
+    # I created these one hot coding binary results from the questions with multiple answers
+    student_df = student_df.rename(columns={"FavColor": "FavColorIsBlue", "HairColor": "HairColorIsBrown", "EyeColor": "EyeColorIsBrown",
+                                            "CookieType": "CookieTypeIsChocChip", "FavIceCream": "FavIceCreamIsVanilla",
+                                            "FavPizzaTopping": "FavPizzaToppingIsPepperoni"})
+    return student_df
 
 
 class Cluster:
@@ -137,9 +183,9 @@ def agglomerative_clustering(clusters):
         clusters.append(mergedCluster)
         return agglomerative_clustering(clusters)
 
+
 if __name__ == '__main__':
     """
     Expects the first argument when calling the program to be the filename of the csv data
     """
     prepare_agglomerative(sys.argv[1])
-
