@@ -25,39 +25,6 @@ def remove_duplicates(csv_file):
     print(student_df.to_string())
 
 
-def binary_to_numeric(csv_file):
-    """
-    Converts the multivariable and binary questions to all be binary data, either 1 or 0
-    :param csv_file: The csv file holding the student data
-    :return: The dataframe with the binary data
-    """
-    # Converts binary variables with True or False values to numeric 1 and 0 integers
-    student_df = pandas.read_csv(csv_file)
-    student_df = student_df.applymap(lambda binary_uppercase: binary_uppercase.lower() if type(binary_uppercase) == str else binary_uppercase)
-    student_df['PantsBeforeSocks'] = student_df['PantsBeforeSocks'].apply(lambda binary: 1 if binary else 0)
-    student_df['MatrixPill'] = student_df['MatrixPill'].apply(lambda pill: 1 if pill == "RED" else 0)
-    student_df['ToiletRollOrientation'] = student_df['ToiletRollOrientation'].apply(lambda roll: 1 if roll == "front" else 0)
-    student_df = student_df.applymap(lambda boolean: 1 if boolean == "true" else (0 if boolean == "false" else boolean))
-    student_df = student_df.applymap(lambda binary: 1 if binary == "yes" or binary == "yes." else (0 if binary == "no" or binary == "no." else binary))
-    student_df = student_df.applymap(lambda empty: 0 if empty == " " else empty)
-
-    # Uses one hot coding to convert a variable with multiple answers to a binary variable, such as is a person's
-    # favorite ice cream vanilla or not
-    student_df = student_df.applymap(lambda binary_uppercase: binary_uppercase.lower() if type(binary_uppercase) == str else binary_uppercase)
-    student_df['EMAIL'] = student_df['EMAIL'].apply(lambda email: 1 if email == "cell" else 0)
-    student_df['FavColor'] = student_df['FavColor'].apply(lambda color: 1 if color == "blue" else 0)
-    student_df['HairColor'] = student_df['HairColor'].apply(lambda color: 1 if color == "brown" else 0)
-    student_df['EyeColor'] = student_df['EyeColor'].apply(lambda color: 1 if color == "brown" else 0)
-    student_df['CookieType'] = student_df['CookieType'].apply(lambda color: 1 if color == "chocolate chip" else 0)
-    student_df['FavIceCream'] = student_df['FavIceCream'].apply(lambda color: 1 if color == "vanilla" else 0)
-    student_df['FavPizzaTopping'] = student_df['FavPizzaTopping'].apply(lambda color: 1 if color == "pepperoni" else 0)
-    # I created these one hot coding binary results from the questions with multiple answers
-    student_df = student_df.rename(columns={"FavColor": "FavColorIsBlue", "HairColor": "HairColorIsBrown", "EyeColor": "EyeColorIsBrown",
-                                            "CookieType": "CookieTypeIsChocChip", "FavIceCream": "FavIceCreamIsVanilla",
-                                            "FavPizzaTopping": "FavPizzaToppingIsPepperoni"})
-    return student_df
-
-
 class Cluster:
     """
     A class that stores the data of the merging clusters and their resulting mode arrays
@@ -80,50 +47,25 @@ def prepare_agglomerative(csv_file):
     :return:
     """
     clusters = []
-    student_df = binary_to_numeric(csv_file)
+    student_df = pandas.read_csv(csv_file)
     for cluster_index in range(len(student_df)):
         array_from_df = student_df.iloc[cluster_index].to_numpy()
         clusters.append(Cluster([array_from_df], array_from_df))
     agglomerative_clustering(clusters)
 
 
-def jaccard_cluster_distance(clusterA, clusterB):
-    """
-    Calculates the Jaccard coefficient between clusters, and then converts that similarity value to a distance value
-    :param clusterA: The first cluster being compared
-    :param clusterB: The second cluster being compared
-    :return: The jaccard similarity converts to a distance, between two clusters
-    """
-    jaccard_present_and_matching = 0
-    jaccard_total_present = 0
-    for data_index in range(2, len(clusterA.center)):
-        # Calculates the intersection and union of the clusters A and B
-        if clusterA.center[data_index] == clusterB.center[data_index] and clusterA.center[data_index] != 0:
-            jaccard_present_and_matching += int(clusterA.center[data_index])
-            jaccard_total_present += int(clusterA.center[data_index])
-        elif clusterA.center[data_index] != 0:
-            jaccard_total_present += int(clusterA.center[data_index])
-        elif clusterB.center[data_index] != 0:
-            jaccard_total_present += int(clusterB.center[data_index])
-    jaccard_coefficient = jaccard_present_and_matching / jaccard_total_present
-    # Converts the jaccard similarity to a distance by subtracting it from 1
-    jaccard_distance = 1 - jaccard_coefficient
-    return jaccard_distance
+def euclidean_distance(clusterA, clusterB):
+    euclidean_distance = 0
+    average_a = 0
+    average_b = 0
+    for data_index in range(1, len(clusterA.center)):
+        average_a += clusterA.center[data_index]
+        average_b += clusterB.center[data_index]
+    average_a /= len(clusterA.center) - 1
+    average_b /= len(clusterB.center) - 1
 
-
-def hamming_cluster_distance(clusterA, clusterB):
-    """
-    Calculates the Hamming distance between clusters
-    :param clusterA: The first cluster being compared
-    :param clusterB: The second cluster being compared
-    :return: The hamming distance between two clusters
-    """
-    hamming_distance = 0
-    for data_index in range(2, len(clusterA.center)):
-        # Only increments the distance for values that differm such as [0, 1] and [1, 0]
-        if clusterA.center[data_index] != clusterB.center[data_index]:
-            hamming_distance += int(clusterA.center[data_index])
-    return hamming_distance
+    euclidean_distance = numpy.linalg.norm(average_a - average_b)
+    return euclidean_distance
 
 
 def agglomerative_clustering(clusters):
@@ -143,7 +85,7 @@ def agglomerative_clustering(clusters):
         for clusterB in clusters:
             # Compares cluster IDs to ensure the same cluster isn't compared with itself
             if clusterA.center[0] != clusterB.center[0]:
-                current_dist = jaccard_cluster_distance(clusterA, clusterB)
+                current_dist = euclidean_distance(clusterA, clusterB)
                 # The function for getting the hamming distance between two clusters
                 # current_dist = hamming_cluster_distance(clusterA, clusterB)
                 if current_dist < best_cluster_dist:
@@ -163,17 +105,24 @@ def agglomerative_clustering(clusters):
         merge_array = numpy.column_stack((merge_array, b_cluster))
         allClusters.append(b_cluster)
 
-    mode_array = []
-    # Takes the mode of each element in all the clusters and creates one center array for the new merged cluster
+    mean_array = []
+    # Takes the mean of each element in all the clusters and creates one center array for the new merged cluster
     for array in merge_array:
-        mode_array.append(statistics.mode(array))
+        mean_array.append(statistics.mean(array))
     # The new merged cluster
-    mergedCluster = Cluster(allClusters, mode_array)
+    if sum(clusterA.center[1:]) > sum(clusterB.center[1:]):
+        #print("smaller: ", clusterB.center)
+        print("Merging Cluster #", clusterA.clusters[0][0], ": ",  len(clusterA.clusters))
+    else:
+        #print("smaller: ", clusterA.center)
+        print("Merging Cluster #", clusterB.clusters[0][0], ": ", len(clusterB.clusters))
 
-    if len(clusters) <= 2:
+    mergedCluster = Cluster(allClusters, mean_array)
+
+    if len(clusters) <= 6:
         # Ends the recursion when the number of clusters in the group reaches 2
         for c in clusters:
-            print("Final Two Clusters - Number of Clusters: ", len(c.clusters), 'Cluster Center: ', c.center)
+            print("Final Six Clusters - Number of Clusters: ", len(c.clusters), 'Cluster Center: ', c.center, "Cluster ID: ", c.clusters[0][0])
         return clusters
     else:
         # Recursively calls this function group the clusters, removing the grouped clusters and adding the new
@@ -188,4 +137,4 @@ if __name__ == '__main__':
     """
     Expects the first argument when calling the program to be the filename of the csv data
     """
-    prepare_agglomerative(sys.argv[1])
+    prepare_agglomerative("test.csv")
