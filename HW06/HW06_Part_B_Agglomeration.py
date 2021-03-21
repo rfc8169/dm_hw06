@@ -10,19 +10,6 @@ import statistics
 import numpy
 import pandas
 
-
-def remove_duplicates(csv_file):
-    """
-    Removes duplicates from the dataframe created from the csv data file and outputs that result to the console,
-    which is the exact same as the original data since there are not duplicates.
-    :param csv_file: The student data
-    :return:
-    """
-    student_df = pandas.read_csv(csv_file)
-    student_df.drop_duplicates()
-    print(student_df.to_string())
-
-
 class Cluster:
     """
     A class that stores the data of the merging clusters and their resulting mode arrays
@@ -53,7 +40,6 @@ def prepare_agglomerative(csv_file):
 
 
 def euclidean_distance(clusterA, clusterB):
-    euclidean_distance = 0
     average_a = 0
     average_b = 0
     for data_index in range(1, len(clusterA.center)):
@@ -86,7 +72,7 @@ def agglomerative_clustering(clusters):
                 current_dist = euclidean_distance(clusterA, clusterB)
                 # The function for getting the hamming distance between two clusters
                 # current_dist = hamming_cluster_distance(clusterA, clusterB)
-                if current_dist < best_cluster_dist:
+                if current_dist <= best_cluster_dist:
                     # Finds the two clusters with the shortest distance between each other from all the clusters
                     best_cluster_dist = current_dist
                     similarClusterA = clusterA
@@ -105,22 +91,28 @@ def agglomerative_clustering(clusters):
 
     mean_array = []
     # Takes the mean of each element in all the clusters and creates one center array for the new merged cluster
-    for array in merge_array:
-        mean_array.append(statistics.mean(array))
+    for array_index in range(len(merge_array)):
+        if array_index == 0:
+            merge_array[array_index].sort()
+            mean_array.append(merge_array[array_index][0])
+        else:
+            mean_array.append(statistics.mean(merge_array[array_index]))
+
     # The new merged cluster
-    if sum(clusterA.center[1:]) > sum(clusterB.center[1:]):
+    # if sum(clusterA.center[1:]) > sum(clusterB.center[1:]):
         #print("smaller: ", clusterB.center)
-        print("Merging Cluster #", clusterA.clusters[0][0], ": ",  len(clusterA.clusters))
-    else:
+        #print("Merging Cluster #", clusterA.clusters[0][0], ": ",  len(clusterA.clusters))
+    # else:
         #print("smaller: ", clusterA.center)
-        print("Merging Cluster #", clusterB.clusters[0][0], ": ", len(clusterB.clusters))
+        #print("Merging Cluster #", clusterB.clusters[0][0], ": ", len(clusterB.clusters))
+    # print("CLUSTERING: ", allClusters)
 
     mergedCluster = Cluster(allClusters, mean_array)
 
-    if len(clusters) <= 6:
+    if len(clusters) <= 2:
         # Ends the recursion when the number of clusters in the group reaches 2
         for c in clusters:
-            print("Final Six Clusters - Number of Clusters: ", len(c.clusters), 'Cluster Center: ', c.center, "Cluster ID: ", c.clusters[0][0])
+            print("Final Six Clusters - Cluster ID:", c.center[0], "Number of Clusters: ", len(c.clusters), 'Cluster Center: ', c.center)
         return clusters
     else:
         # Recursively calls this function group the clusters, removing the grouped clusters and adding the new
@@ -129,7 +121,6 @@ def agglomerative_clustering(clusters):
         clusters.remove(similarClusterB)
         clusters.append(mergedCluster)
         return agglomerative_clustering(clusters)
-
 
 if __name__ == '__main__':
     """
