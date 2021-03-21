@@ -1,13 +1,11 @@
 """
-Assignment: HW03
-Description: An agglomerative clustering algorithm that groups clusters using a jaccard similarity coefficient
-converted to a distance or hamming distance.
-Author: Reed Cogliano
+Assignment: HW06
+Description: An agglomerative clustering algorithm that groups clusters using a euclidean distance metric.
+Author: Reed Cogliano, Neel Raj
 """
 
 import math
 import statistics
-import sys
 
 import numpy
 import pandas
@@ -78,7 +76,7 @@ def agglomerative_clustering(clusters):
     there are only two clusters remaining in the array
     :param clusters: An array of all the grouped clusters that exist
     :return: Recursively calls this function on the new list that removed the two closest clusters
-    and added their merged cluster back in. Recurses until there are only two clusters remaining.
+    and added their merged cluster back in. Recurse until there are only two clusters remaining.
     """
     best_cluster_dist = math.inf
     for clusterA in clusters:
