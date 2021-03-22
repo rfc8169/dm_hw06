@@ -4,16 +4,15 @@ Description:
 Author: Reed Cogliano, Neel Raj
 """
 from sklearn.cluster import KMeans
-import numpy as np
 import pandas
 
 
 def prepare_kmeans(csv_file):
-    clusters = []
     student_df = pandas.read_csv(csv_file)
+    clusters = []
     for cluster_index in range(len(student_df)):
         array_from_df = student_df.iloc[cluster_index].to_numpy()
-        clusters.append(np.array(array_from_df))
+        clusters.append(array_from_df)
     kmeans_clustering(clusters)
 
 
