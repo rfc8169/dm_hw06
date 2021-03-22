@@ -12,7 +12,7 @@ def calculate_cross_correlation(csv_file):
     :param: csv_file - csv file containing data
     """
     sss_df = pandas.read_csv(csv_file).drop(['ID'], axis=1)
-    return sss_df.corr(method='pearson')
+    return round(sss_df.corr(method='pearson'), 3)
 
 
 def strongest_correlation(ct_df):
@@ -32,16 +32,17 @@ def strongest_correlation(ct_df):
 
 
 def get_strongest_correlated_with(ct_df):
-    label = input("Enter attribute to find strongly correlated with: ")
+    label = input('Enter valid attribute: ')
     max_correlation = 0
     best_attr = 0
     count = 0
-    for coefficient in ct_df.loc[:, label]:
-        coefficient = abs(coefficient)
-        count = count + 1
-        if coefficient > max_correlation and coefficient != 1:
+    fields = list(ct_df.columns.values)
+    for coefficient in ct_df.loc[label]:
+        print(coefficient)
+        if abs(coefficient) > max_correlation and coefficient != 1:
             best_attr = count
-    print(label + " is strongly correlated with " + list(ct_df.columns.values)[best_attr] + ".")
+        count = count + 1
+    print(label + " is strongly correlated with " + fields[best_attr] + ".")
 
 
 if __name__ == '__main__':
