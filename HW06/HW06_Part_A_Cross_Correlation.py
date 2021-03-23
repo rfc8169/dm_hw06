@@ -19,8 +19,8 @@ def strongest_correlation(ct_df):
     max_correlation_col = 0
     max_correlation_row = 0
     max_correlation = 0
-    for col_index in range(1, len(ct_df)):
-        for row_index in range(1, len(ct_df)):
+    for col_index in range(0, len(ct_df)):
+        for row_index in range(0, len(ct_df)):
             if row_index != col_index:
                 correlation_coefficient = abs(ct_df.iloc[row_index, col_index])
                 if correlation_coefficient > max_correlation:
@@ -39,7 +39,8 @@ def get_strongest_correlated_with(ct_df):
     fields = list(ct_df.columns.values)
     for coefficient in ct_df.loc[label]:
         print(coefficient)
-        if abs(coefficient) > max_correlation and coefficient != 1:
+        if (abs(coefficient) > max_correlation) and (coefficient != 1):
+            max_correlation = abs(coefficient)
             best_attr = count
         count = count + 1
     print(label + " is strongly correlated with " + fields[best_attr] + ".")
