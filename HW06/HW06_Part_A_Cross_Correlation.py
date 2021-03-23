@@ -12,7 +12,9 @@ def calculate_cross_correlation(csv_file):
     :param: csv_file - csv file containing data
     """
     sss_df = pandas.read_csv(csv_file).drop(['ID'], axis=1)
-    return round(sss_df.corr(method='pearson'), 3)
+    correlation_table = round(sss_df.corr(method='pearson'), 3)
+    correlation_table.to_csv('correlation_table.csv', index=False)
+    return correlation_table
 
 
 def strongest_correlation(ct_df):
@@ -32,13 +34,13 @@ def strongest_correlation(ct_df):
 
 
 def get_strongest_correlated_with(ct_df):
-    label = input('Enter valid attribute: ')
+    label = input('Enter valid attribute (Beans,Bread,Cerel,ChdBby,Chips,Corn,Eggs,Fish,Fruit,Meat,Milk,Pepper,' +
+                  'Rice,Salza,Sauce,Soda,Tomato,Tortya,Vegges,YogChs): ')
     max_correlation = 0
     best_attr = 0
     count = 0
     fields = list(ct_df.columns.values)
     for coefficient in ct_df.loc[label]:
-        print(coefficient)
         if (abs(coefficient) > max_correlation) and (coefficient != 1):
             max_correlation = abs(coefficient)
             best_attr = count
@@ -46,10 +48,15 @@ def get_strongest_correlated_with(ct_df):
     print(label + " is strongly correlated with " + fields[best_attr] + ".")
 
 
+def part_a_driver():
+    correlation_table = calculate_cross_correlation("HW_PCA_SHOPPING_CART_v896.csv")
+    strongest_correlation(correlation_table)
+    get_strongest_correlated_with(correlation_table)
+
+
 if __name__ == '__main__':
     """
     
     """
-    correlation_table = calculate_cross_correlation("HW_PCA_SHOPPING_CART_v896.csv")
-    strongest_correlation(correlation_table)
-    get_strongest_correlated_with(correlation_table)
+    part_a_driver()
+
