@@ -54,7 +54,8 @@ def get_least_correlated_with(cct_df):
     for attr in fields:
         average_coefficient = 0
         for coefficient in cct_df.loc[attr]:
-            average_coefficient = average_coefficient + abs(coefficient)
+            if coefficient != 1:
+                average_coefficient = average_coefficient + abs(coefficient)
         average_coefficient = average_coefficient / len(fields)
         cct[attr] = round(average_coefficient, 3)
     cct = {k: v for k, v in sorted(cct.items(), key=lambda item: item[1])}
@@ -63,8 +64,8 @@ def get_least_correlated_with(cct_df):
 
 def part_a_driver():
     cross_correlation_table = calculate_cross_correlation("HW_PCA_SHOPPING_CART_v896.csv")
-    #strongest_correlation(cross_correlation_table)
-    #get_strongest_correlated_with(cross_correlation_table)
+    strongest_correlation(cross_correlation_table)
+    get_strongest_correlated_with(cross_correlation_table)
     get_least_correlated_with(cross_correlation_table)
 
 
