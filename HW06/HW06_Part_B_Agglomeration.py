@@ -48,8 +48,8 @@ def euclidean_distance(clusterA, clusterB):
     average_a /= len(clusterA.center) - 1
     average_b /= len(clusterB.center) - 1
 
-    euclidean_distance = numpy.linalg.norm(average_a - average_b)
-    return euclidean_distance
+    euclidean_dist = numpy.linalg.norm(average_a - average_b)
+    return euclidean_dist
 
 
 def agglomerative_clustering(clusters):
@@ -121,6 +121,7 @@ def agglomerative_clustering(clusters):
         clusters.remove(similarClusterB)
         clusters.append(mergedCluster)
         return agglomerative_clustering(clusters)
+
 
 if __name__ == '__main__':
     """
