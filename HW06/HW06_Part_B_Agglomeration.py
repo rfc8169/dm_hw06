@@ -5,10 +5,11 @@ Author: Reed Cogliano, Neel Raj
 """
 
 import math
-import statistics
-
 import numpy
 import pandas
+
+from scipy.cluster import hierarchy
+import matplotlib.pyplot as plt
 
 class Cluster:
     """
@@ -24,6 +25,13 @@ class Cluster:
         self.center = center
 
 
+def create_dendrogram(merged_clusters):
+    Z = hierarchy.linkage(merged_clusters, 'single')
+    plt.figure()
+    dn = hierarchy.dendrogram(Z)
+    plt.show()
+
+
 def prepare_agglomerative(csv_file):
     """
     Converts the dataframe data to binary values and converts the dataframe values to arrays
@@ -36,23 +44,17 @@ def prepare_agglomerative(csv_file):
     for cluster_index in range(len(student_df)):
         array_from_df = student_df.iloc[cluster_index].to_numpy()
         clusters.append(Cluster([array_from_df], array_from_df))
-    agglomerative_clustering(clusters)
+    merged_clusters = agglomerative_clustering(clusters, numpy.array([]))
+
+    create_dendrogram(merged_clusters)
 
 
 def euclidean_distance(clusterA, clusterB):
-    average_a = 0
-    average_b = 0
-    for data_index in range(1, len(clusterA.center)):
-        average_a += clusterA.center[data_index]
-        average_b += clusterB.center[data_index]
-    average_a /= len(clusterA.center) - 1
-    average_b /= len(clusterB.center) - 1
-
-    euclidean_distance = numpy.linalg.norm(average_a - average_b)
+    euclidean_distance = numpy.linalg.norm(clusterA.center - clusterB.center)
     return euclidean_distance
 
 
-def agglomerative_clustering(clusters):
+def agglomerative_clustering(clusters, merged_clusters):
     """
     Loops through every cluster and finds two clusters with the shortest jaccard distance or hamming distance.
     Once the closest clusters are found it takes the mode of their binary values and stores that result into a new
@@ -78,25 +80,16 @@ def agglomerative_clustering(clusters):
                     similarClusterA = clusterA
                     similarClusterB = clusterB
 
-    # Creates initialized arrays used to create a new merged cluster
-    merge_array = similarClusterA.clusters[0]
-    allClusters = [similarClusterA.clusters[0]]
-    # Stores all the clusters in each cluster into their own array so the mode of all the clusters can be easily found
-    for a_cluster_index in range(1, len(similarClusterA.clusters)):
-        merge_array = numpy.column_stack((merge_array, similarClusterA.clusters[a_cluster_index]))
-        allClusters.append(similarClusterA.clusters[a_cluster_index])
-    for b_cluster in similarClusterB.clusters:
-        merge_array = numpy.column_stack((merge_array, b_cluster))
-        allClusters.append(b_cluster)
 
-    mean_array = []
-    # Takes the mean of each element in all the clusters and creates one center array for the new merged cluster
-    for array_index in range(len(merge_array)):
-        if array_index == 0:
-            merge_array[array_index].sort()
-            mean_array.append(merge_array[array_index][0])
-        else:
-            mean_array.append(statistics.mean(merge_array[array_index]))
+    allClusters = numpy.append(similarClusterA.clusters, similarClusterB.clusters, axis=0)
+
+    mean_array = numpy.mean(allClusters, axis=0)
+    min_id = math.inf
+    for min_id_index in range(len(allClusters)):
+        if allClusters[min_id_index][0] < min_id:
+            min_id = allClusters[min_id_index][0]
+    mean_array[0] = min_id
+
 
     # The new merged cluster
     # if sum(clusterA.center[1:]) > sum(clusterB.center[1:]):
@@ -112,15 +105,20 @@ def agglomerative_clustering(clusters):
     if len(clusters) <= 2:
         # Ends the recursion when the number of clusters in the group reaches 2
         for c in clusters:
-            print("Final Six Clusters - Cluster ID:", c.center[0], "Number of Clusters: ", len(c.clusters), 'Cluster Center: ', c.center)
-        return clusters
+            print("Final Two Clusters - Cluster ID:", c.center[0], "Number of Clusters: ", len(c.clusters), 'Cluster Center: ', c.center)
+        return merged_clusters
     else:
         # Recursively calls this function group the clusters, removing the grouped clusters and adding the new
         # merged cluster before passing the array of clusters
+        linkage_data = numpy.array([similarClusterA.center[0], similarClusterB.center[0], best_cluster_dist, len(allClusters)])
+        if merged_clusters.size == 0:
+            merged_clusters = linkage_data
+        else:
+            merged_clusters = numpy.vstack((merged_clusters, linkage_data))
         clusters.remove(similarClusterA)
         clusters.remove(similarClusterB)
         clusters.append(mergedCluster)
-        return agglomerative_clustering(clusters)
+        return agglomerative_clustering(clusters, merged_clusters)
 
 if __name__ == '__main__':
     """
