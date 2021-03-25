@@ -12,7 +12,7 @@ def prepare_kmeans(csv_file):
     clusters = []
     for cluster_index in range(len(student_df)):
         array_from_df = student_df.iloc[cluster_index].to_numpy()
-        clusters.append(array_from_df)
+        clusters.append(array_from_df[1:])
     kmeans_clustering(clusters)
 
 
