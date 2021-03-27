@@ -7,14 +7,17 @@ Author: Reed Cogliano, Neel Raj
 import math
 import numpy
 import pandas
+import time
 
 from scipy.cluster import hierarchy
 import matplotlib.pyplot as plt
+
 
 class Cluster:
     """
     A class that stores the data of the merging clusters and their resulting mode arrays
     """
+
     def __init__(self, clusters, center):
         """
         The initialization for the class
@@ -44,28 +47,33 @@ def prepare_agglomerative(csv_file):
     for cluster_index in range(len(student_df)):
         array_from_df = student_df.iloc[cluster_index].to_numpy()
         clusters.append(Cluster([array_from_df], array_from_df))
+    start = time.time()
     merged_clusters = agglomerative_clustering(clusters, numpy.array([]))
-
+    end = time.time()
+    print("Runtime: " + str(end - start))
     create_dendrogram(merged_clusters)
 
 
 def euclidean_distance(clusterA, clusterB):
-    euclidean_distance = numpy.linalg.norm(clusterA.center - clusterB.center)
-    return euclidean_distance
+    euclidean_dist = numpy.linalg.norm(clusterA.center - clusterB.center)
+    return euclidean_dist
 
 
 def agglomerative_clustering(clusters, merged_clusters):
     """
-    Loops through every cluster and finds two clusters with the shortest jaccard distance or hamming distance.
+    Loops through every cluster and finds two clusters with the shortest euclidean distance.
     Once the closest clusters are found it takes the mode of their binary values and stores that result into a new
     cluster as its center, the actual data in each cluster is also stored in the cluster object so it can calculate a
     new center if it has to merge again. Once it has created a merged cluster it deletes the two older clusters from
     the array and adds the merged cluster. Then it will recurse and execute this function again, until
     there are only two clusters remaining in the array
-    :param clusters: An array of all the grouped clusters that exist
+    :param clusters - an array of all the grouped clusters that exist
+    :param: merged_clusters -
     :return: Recursively calls this function on the new list that removed the two closest clusters
     and added their merged cluster back in. Recurse until there are only two clusters remaining.
     """
+    similarClusterA = None
+    similarClusterB = None
     best_cluster_dist = math.inf
     for clusterA in clusters:
         for clusterB in clusters:
@@ -80,7 +88,6 @@ def agglomerative_clustering(clusters, merged_clusters):
                     similarClusterA = clusterA
                     similarClusterB = clusterB
 
-
     allClusters = numpy.append(similarClusterA.clusters, similarClusterB.clusters, axis=0)
 
     mean_array = numpy.mean(allClusters, axis=0)
@@ -90,27 +97,28 @@ def agglomerative_clustering(clusters, merged_clusters):
             min_id = allClusters[min_id_index][0]
     mean_array[0] = min_id
 
-
     # The new merged cluster
     # if sum(clusterA.center[1:]) > sum(clusterB.center[1:]):
-        #print("smaller: ", clusterB.center)
-        #print("Merging Cluster #", clusterA.clusters[0][0], ": ",  len(clusterA.clusters))
+    # print("smaller: ", clusterB.center)
+    # print("Merging Cluster #", clusterA.clusters[0][0], ": ",  len(clusterA.clusters))
     # else:
-        #print("smaller: ", clusterA.center)
-        #print("Merging Cluster #", clusterB.clusters[0][0], ": ", len(clusterB.clusters))
+    # print("smaller: ", clusterA.center)
+    # print("Merging Cluster #", clusterB.clusters[0][0], ": ", len(clusterB.clusters))
     # print("CLUSTERING: ", allClusters)
 
     mergedCluster = Cluster(allClusters, mean_array)
 
-    if len(clusters) <= 2:
+    if len(clusters) == 6:
         # Ends the recursion when the number of clusters in the group reaches 2
         for c in clusters:
-            print("Final Two Clusters - Cluster ID:", c.center[0], "Number of Clusters: ", len(c.clusters), 'Cluster Center: ', c.center)
+            print("Final Two Clusters - Cluster ID:", c.center[0], "Number of Clusters: ", len(c.clusters),
+                  'Cluster Center: ', c.center)
         return merged_clusters
     else:
         # Recursively calls this function group the clusters, removing the grouped clusters and adding the new
         # merged cluster before passing the array of clusters
-        linkage_data = numpy.array([similarClusterA.center[0], similarClusterB.center[0], best_cluster_dist, len(allClusters)])
+        linkage_data = numpy.array(
+            [similarClusterA.center[0], similarClusterB.center[0], best_cluster_dist, len(allClusters)])
         if merged_clusters.size == 0:
             merged_clusters = linkage_data
         else:
@@ -120,8 +128,9 @@ def agglomerative_clustering(clusters, merged_clusters):
         clusters.append(mergedCluster)
         return agglomerative_clustering(clusters, merged_clusters)
 
+
 if __name__ == '__main__':
     """
     Expects the first argument when calling the program to be the filename of the csv data
     """
-    prepare_agglomerative("test.csv")
+    prepare_agglomerative("HW_PCA_SHOPPING_CART_v896.csv")

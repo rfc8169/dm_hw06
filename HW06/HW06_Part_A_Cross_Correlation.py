@@ -11,7 +11,7 @@ def calculate_cross_correlation(csv_file):
     """
     Uses the pandas library to determine the cross correlation table of the provided csv file.
     Writes the pandas dataframe containing the cross correlation table to a file.
-    :param: csv_file - csv file containing data
+    :param: csv_file - csv file containing data to process
     :return: cross_correlation_table - pandas dataframe containing the cross correlation values
     """
     sss_df = pandas.read_csv(csv_file).drop(['ID'], axis=1)
@@ -46,7 +46,7 @@ def get_strongest_correlated_with(cct_df):
     :param: cct_df - pandas dataframe containing the cross correlation table
     """
     attr = input('Enter valid attribute (Beans,Bread,Cerel,ChdBby,Chips,Corn,Eggs,Fish,Fruit,Meat,Milk,Pepper,' +
-                  'Rice,Salza,Sauce,Soda,Tomato,Tortya,Vegges,YogChs): ')
+                 'Rice,Salza,Sauce,Soda,Tomato,Tortya,Vegges,YogChs): ')
     max_correlation = 0
     best_attr = 0
     count = 0
@@ -93,4 +93,3 @@ if __name__ == '__main__':
     Runs the driver for the methods defined in Part A.
     """
     part_a_driver()
-
