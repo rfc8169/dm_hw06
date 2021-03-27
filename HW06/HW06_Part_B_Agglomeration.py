@@ -47,10 +47,12 @@ def prepare_agglomerative(csv_file):
     for cluster_index in range(len(student_df)):
         array_from_df = student_df.iloc[cluster_index].to_numpy()
         clusters.append(Cluster([array_from_df], array_from_df))
+    #   Start time of Agglomerative Clustering Algo
     start = time.time()
     merged_clusters = agglomerative_clustering(clusters, numpy.array([]))
+    #   End time of Agglomerative Clustering Algo
     end = time.time()
-    print("Runtime: " + str(end - start))
+    print("Runtime: " + str(round(int(end - start), 3)))
     create_dendrogram(merged_clusters)
 
 
