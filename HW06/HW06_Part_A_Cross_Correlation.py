@@ -46,17 +46,18 @@ def get_strongest_correlated_with(cct_df):
     :param: cct_df - pandas dataframe containing the cross correlation table
     """
     attr = input('Enter valid attribute (Beans,Bread,Cerel,ChdBby,Chips,Corn,Eggs,Fish,Fruit,Meat,Milk,Pepper,' +
-                 'Rice,Salza,Sauce,Soda,Tomato,Tortya,Vegges,YogChs): ')
-    max_correlation = 0
-    best_attr = 0
-    count = 0
-    fields = list(cct_df.columns.values)
-    for coefficient in cct_df.loc[attr]:
-        if (abs(coefficient) > max_correlation) and (coefficient != 1):
-            max_correlation = abs(coefficient)
-            best_attr = count
-        count = count + 1
-    print(attr + " is strongly correlated with " + fields[best_attr] + ".")
+                 'Rice,Salza,Sauce,Soda,Tomato,Tortya,Vegges,YogChs,NULL): ')
+    if attr != 'NULL':
+        max_correlation = 0
+        best_attr = 0
+        count = 0
+        fields = list(cct_df.columns.values)
+        for coefficient in cct_df.loc[attr]:
+            if (abs(coefficient) > max_correlation) and (coefficient != 1):
+                max_correlation = abs(coefficient)
+                best_attr = count
+            count = count + 1
+        print(attr + " is strongly correlated with " + fields[best_attr] + ".")
 
 
 def get_least_correlated_with(cct_df):
@@ -78,6 +79,19 @@ def get_least_correlated_with(cct_df):
     print(cct)
 
 
+def get_cross_correlation_coefficient(cct_df):
+    print('List of attributes: Beans,Bread,Cerel,ChdBby,Chips,Corn,Eggs,Fish,Fruit,Meat,Milk,Pepper,' +
+          'Rice,Salza,Sauce,Soda,Tomato,Tortya,Vegges,YogChs,NULL')
+    row = input("First attribute: ")
+    col = input("Second attribute: ")
+    if row != 'NULL' or col != 'NULL':
+        fields = list(cct_df.columns.values)
+        row_index = fields.index(row)
+        col_index = fields.index(col)
+        coefficient = cct_df.iloc[row_index, col_index]
+        print("The coefficient between " + str(row) + " and " + str(col) + " is: " + str(coefficient))
+
+
 def part_a_driver():
     """
     Part A Driver creates the cross correlation coefficient table and passes it into the rest of the defined functions.
@@ -86,6 +100,7 @@ def part_a_driver():
     strongest_correlation(cross_correlation_table)
     get_strongest_correlated_with(cross_correlation_table)
     get_least_correlated_with(cross_correlation_table)
+    get_cross_correlation_coefficient(cross_correlation_table)
 
 
 if __name__ == '__main__':
