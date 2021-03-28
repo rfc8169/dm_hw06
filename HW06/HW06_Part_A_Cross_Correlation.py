@@ -99,8 +99,11 @@ def part_a_driver():
     """
     cross_correlation_table = calculate_cross_correlation("HW_PCA_SHOPPING_CART_v896.csv")
     strongest_correlation(cross_correlation_table)
+    print("============================")
     get_strongest_correlated_with(cross_correlation_table)
+    print("============================")
     get_least_correlated_with(cross_correlation_table)
+    print("============================")
     get_cross_correlation_coefficient(cross_correlation_table)
 
 
