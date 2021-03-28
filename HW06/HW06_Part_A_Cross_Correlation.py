@@ -33,6 +33,7 @@ def strongest_correlation(cct_df):
             if row_index != col_index:
                 correlation_coefficient = abs(cct_df.iloc[row_index, col_index])
                 if correlation_coefficient > max_correlation:
+                    max_correlation = correlation_coefficient
                     max_correlation_col = col_index
                     max_correlation_row = row_index
     fields = list(cct_df.columns.values)
